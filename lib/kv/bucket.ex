@@ -21,6 +21,15 @@ defmodule KV.Bucket do
     Agent.update pid, &Map.put(&1, key, value)
   end
 
+  @doc """
+  Deletes the 'value' for the given 'key'.
+
+  Returns the deleted 'value'
+  """
+  def delete(pid, key) do
+    Agent.get_and_update pid, &Map.pop(&1, key, nil)
+  end
+
 end
 
   #################################################################
