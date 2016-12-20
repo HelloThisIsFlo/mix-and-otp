@@ -27,7 +27,25 @@ defmodule KV.Bucket do
   Returns the deleted 'value'
   """
   def delete(pid, key) do
-    Agent.get_and_update pid, &Map.pop(&1, key, nil)
+    Agent.get_and_update pid, &Map.pop(&1, key)
+  end
+
+  def delete_with_sleep(pid, key) do
+    # This sleep happens on the client (here)
+    sleep
+    Agent.get_and_update pid, fn(map) ->
+      # This sleep happens on the server (inside the agent process)
+      #
+      # The reason the test still has to wait is because is is *blocking* until it
+      # receives a response from the Agent process
+      sleep
+      Map.pop map, key
+    end
+  end
+
+  def sleep do
+    IO.puts "Sleeping 3 seconds"
+    :timer.sleep 3000
   end
 
 end
