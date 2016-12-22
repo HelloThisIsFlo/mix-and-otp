@@ -50,4 +50,16 @@ defmodule KV.RegistryTest do
     assert :error == KV.Registry.lookup registry, "shopping"
   end
 
+
+  test "removes only bucket that crashes", %{registry: registry} do
+    KV.Registry.create registry, "shopping"
+    KV.Registry.create registry, "to_be_crashed"
+    {:ok, to_crash} = KV.Registry.lookup registry, "to_be_crashed"
+
+    Agent.stop to_crash
+
+    assert :error == KV.Registry.lookup registry, "to_be_crashed"
+    assert {:ok, _} = KV.Registry.lookup registry, "shopping"
+  end
+
 end

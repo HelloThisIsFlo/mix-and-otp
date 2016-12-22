@@ -67,7 +67,7 @@ defmodule KV.Registry do
   def handle_info({:DOWN, ref, :process, _pid, _cause}, {names, refs} = _state) do
     {bucket_to_remove, refs} = Map.pop refs, ref
     names = Map.delete names, bucket_to_remove
-    {:noreply, {refs, names}}
+    {:noreply, {names, refs}}
   end
   def handle_info(_, state), do: {:noreply, state}
 
