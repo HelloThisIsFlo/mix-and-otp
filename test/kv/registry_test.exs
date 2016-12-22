@@ -50,6 +50,19 @@ defmodule KV.RegistryTest do
     assert :error == KV.Registry.lookup registry, "shopping"
   end
 
+  test "keep running after bucket crashes and removes the bucket", %{registry: registry} do
+    KV.Registry.create registry, "shopping"
+    {:ok, bucket} = KV.Registry.lookup registry, "shopping"
+
+    #Stop the bucket with a non-normal reason
+    Process.exit(bucket, :shutdown)
+
+    #Wait until the bucket is dead
+    ref = Process.monitor(bucket)
+    assert_receive {:DOWN, ^ref, _, _, _}
+
+    assert KV.Registry.lookup(registry, "shopping") == :error
+  end
 
   test "removes only bucket that crashes", %{registry: registry} do
     KV.Registry.create registry, "shopping"

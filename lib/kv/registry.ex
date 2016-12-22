@@ -54,9 +54,7 @@ defmodule KV.Registry do
     if Map.has_key? names, bucket_name do
       {:noreply, state}
     else
-      # We shouldn't link the registry, as we don't want it to crash if the bucket crashes
-      # Should never create new process manually . . . should delegate to the Supervisor
-      {:ok, bucket} = KV.Bucket.start_link
+      {:ok, bucket} = KV.Bucket.Supervisor.start_bucket
       ref = Process.monitor(bucket)
       refs = Map.put refs, ref, bucket_name
       names = Map.put names, bucket_name, bucket

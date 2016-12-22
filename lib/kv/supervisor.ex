@@ -5,20 +5,17 @@ defmodule KV.Supervisor do
     Supervisor.start_link(__MODULE__, :ok)
   end
 
-
-
-
-
   ##########################################
   #########    Supervisor callbacks   ######
   ##########################################
 
   def init(:ok) do
     children = [
-      worker(KV.Registry, [KV.Registry])
+      worker(KV.Registry, [KV.Registry]),
+      supervisor(KV.Bucket.Supervisor, [])
     ]
 
-    supervise(children, strategy: :one_for_one)
+    supervise(children, strategy: :rest_for_one)
   end
 
 end
