@@ -9,7 +9,7 @@ defmodule KV.Registry do
   Starts the registry with the given 'name'
   """
   def start_link(name) do
-    GenServer.start_link(__MODULE__, :ok, name: name)
+    GenServer.start_link(__MODULE__, name, name: name)
   end
 
   @doc """
@@ -18,7 +18,10 @@ defmodule KV.Registry do
   Returns '{:ok, pid}' if the bucket exists, ':error' otherwise
   """
   def lookup(server, bucket_name) do
-    GenServer.call(server, {:lookup, bucket_name})
+    case lookup_bucket(server, bucket_name) do
+      [] -> :error
+      [{_, result}] -> {:ok, result}
+    end
   end
 
   @doc """
@@ -26,7 +29,8 @@ defmodule KV.Registry do
   """
   def create(server, bucket_name) do
     # Actually better to use as call here. A cast is never guaranteed to arrive at the target server !!
-    GenServer.cast(server, {:create, bucket_name})
+    GenServer.call(server, {:create, bucket_name})
+    :ok
   end
 
   @doc """
@@ -40,29 +44,22 @@ defmodule KV.Registry do
   ######   Genserver callbacks    ###
   ###################################
 
-  def init(:ok) do
-    names = :ets.new(:names, [])
+  def init(table_name) do
+    names = :ets.new(table_name, [:named_table, :protected, read_concurrency: true])
     refs = %{}
     {:ok, {names, refs}}
   end
 
-  def handle_call({:lookup, bucket_name}, _sender, {names, _refs} = state) do
-    reply = case lookup_bucket(names, bucket_name) do
-      [] -> :error
-      [{_, result}] -> {:ok, result}
-    end
-    {:reply, reply, state}
-  end
-
-  def handle_cast({:create, bucket_name}, {names, refs} = state) do
-    if has_key? names, bucket_name do
-      {:noreply, state}
-    else
-      {:ok, bucket} = KV.Bucket.Supervisor.start_bucket
-      ref = Process.monitor(bucket)
-      refs = Map.put refs, ref, bucket_name
-      add_bucket(names, bucket_name, bucket)
-      {:noreply, {names, refs}}
+  def handle_call({:create, bucket_name}, _from,  {names, refs} = state) do
+    case lookup(names, bucket_name) do
+      {:ok, bucket} ->
+        {:reply, bucket, state}
+      :error ->
+        {:ok, bucket} = KV.Bucket.Supervisor.start_bucket
+        ref = Process.monitor(bucket)
+        refs = Map.put refs, ref, bucket_name
+        add_bucket(names, bucket_name, bucket)
+        {:reply, bucket, {names, refs}}
     end
   end
 

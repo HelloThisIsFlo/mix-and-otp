@@ -2,8 +2,8 @@ defmodule KV.RegistryTest do
   use ExUnit.Case, async: true
 
   setup context do
-    {:ok, registry} = KV.Registry.start_link(context.test)
-    {:ok, registry: registry}
+    {:ok, _} = KV.Registry.start_link(context.test)
+    {:ok, registry: context.test}
   end
 
   test "error is returned when no buckets", %{registry: registry} do
@@ -46,6 +46,8 @@ defmodule KV.RegistryTest do
     {:ok, bucket} = KV.Registry.lookup registry, "shopping"
 
     Agent.stop bucket
+    # Hack: Execute sync code, to block until the 'info' message has been handled on the Genserver
+    _ = KV.Registry.create(registry, "hack")
 
     assert :error == KV.Registry.lookup registry, "shopping"
   end
@@ -61,6 +63,9 @@ defmodule KV.RegistryTest do
     ref = Process.monitor(bucket)
     assert_receive {:DOWN, ^ref, _, _, _}
 
+    # Hack: Execute sync code, to block until the 'info' message has been handled on the Genserver
+    _ = KV.Registry.create(registry, "hack")
+
     assert KV.Registry.lookup(registry, "shopping") == :error
   end
 
@@ -70,6 +75,8 @@ defmodule KV.RegistryTest do
     {:ok, to_crash} = KV.Registry.lookup registry, "to_be_crashed"
 
     Agent.stop to_crash
+    # Hack: Execute sync code, to block until the 'info' message has been handled on the Genserver
+    _ = KV.Registry.create(registry, "hack")
 
     assert :error == KV.Registry.lookup registry, "to_be_crashed"
     assert {:ok, _} = KV.Registry.lookup registry, "shopping"
