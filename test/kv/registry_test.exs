@@ -6,7 +6,7 @@ defmodule KV.RegistryTest do
     {:ok, registry: registry}
   end
 
-  test "error is thrown when no buckets", %{registry: registry} do
+  test "error is returned when no buckets", %{registry: registry} do
     assert :error = KV.Registry.lookup(registry, "not_existing")
   end
 

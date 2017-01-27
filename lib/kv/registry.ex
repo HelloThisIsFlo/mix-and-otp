@@ -41,30 +41,39 @@ defmodule KV.Registry do
   ###################################
 
   def init(:ok) do
-    names = %{}
+    names = :ets.new(:names, [])
     refs = %{}
     {:ok, {names, refs}}
   end
 
   def handle_call({:lookup, bucket_name}, _sender, {names, _refs} = state) do
-    {:reply, Map.fetch(names, bucket_name), state}
+    reply = case lookup_bucket(names, bucket_name) do
+      [] -> :error
+      [{_, result}] -> {:ok, result}
+    end
+    {:reply, reply, state}
   end
 
   def handle_cast({:create, bucket_name}, {names, refs} = state) do
-    if Map.has_key? names, bucket_name do
+    if has_key? names, bucket_name do
       {:noreply, state}
     else
       {:ok, bucket} = KV.Bucket.Supervisor.start_bucket
       ref = Process.monitor(bucket)
       refs = Map.put refs, ref, bucket_name
-      names = Map.put names, bucket_name, bucket
+      add_bucket(names, bucket_name, bucket)
       {:noreply, {names, refs}}
     end
   end
 
+  defp has_key?(table, bucket_name), do: Enum.count(:ets.lookup(table, bucket_name)) != 0
+  defp add_bucket(table, bucket_name, bucket), do: :ets.insert(table, {bucket_name, bucket})
+  defp remove_bucket(table, bucket_name), do: :ets.delete(table, bucket_name)
+  defp lookup_bucket(table, bucket_name), do: :ets.lookup(table, bucket_name)
+
   def handle_info({:DOWN, ref, :process, _pid, _cause}, {names, refs} = _state) do
     {bucket_to_remove, refs} = Map.pop refs, ref
-    names = Map.delete names, bucket_to_remove
+    remove_bucket(names, bucket_to_remove)
     {:noreply, {names, refs}}
   end
   def handle_info(_, state), do: {:noreply, state}
