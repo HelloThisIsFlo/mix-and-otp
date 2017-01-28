@@ -1,4 +1,7 @@
 defmodule KVServer.Command do
+
+  @ok {:ok, "OK\r\n"}
+
   @doc ~S"""
   Parses the given `line` into a command.
 
@@ -43,8 +46,38 @@ defmodule KVServer.Command do
   @doc """
   Runs the given command
   """
-  def run(command) do
-    {:ok, "OK\r\n"}
+  def run(command)
+
+  def run({:create, bucket}) do
+    KV.Registry.create(KV.Registry, bucket)
+    @ok
+  end
+  def run({:put, bucket, key, value}) do
+    lookup bucket, fn(pid) ->
+      KV.Bucket.put(pid, key, value)
+      @ok
+    end
+  end
+  def run({:get, bucket, key}) do
+    lookup bucket, fn(pid) ->
+      value = KV.Bucket.get(pid, key)
+      {:ok, "#{value}\r\nOK\r\n"}
+    end
+  end
+  def run({:delete, bucket, key}) do
+    lookup bucket, fn pid ->
+      KV.Bucket.delete(pid, key)
+      @ok
+    end
+  end
+
+  defp lookup(bucket_name, callback) do
+    case KV.Registry.lookup(KV.Registry, bucket_name) do
+      {:ok, pid} ->
+        callback.(pid)
+      :error ->
+        {:error, :not_found}
+    end
   end
 
 end
