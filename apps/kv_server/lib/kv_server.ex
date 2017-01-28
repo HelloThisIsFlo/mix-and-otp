@@ -3,15 +3,6 @@ defmodule KVServer do
   Documentation for KVServer.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> KVServer.hello
-      :world
-
-  """
   def hello(bucket_name, to_save) do
     KV.Registry.create(KV.Registry, bucket_name)
     {:ok, bucket} = KV.Registry.lookup(KV.Registry, bucket_name)
