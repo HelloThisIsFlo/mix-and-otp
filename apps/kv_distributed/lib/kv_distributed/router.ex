@@ -1,9 +1,5 @@
 defmodule KVDistributed.Router do
 
-  def table do
-    Application.fetch_env!(:kv_server, :routing_table)
-  end
-
   @doc """
   Dispatch the given `mod`, `fun`, `args` request
   to the appropriate node based on the `bucket` first letter.
@@ -23,6 +19,15 @@ defmodule KVDistributed.Router do
           |> Task.await
         end
     end
+  end
+
+
+  ###############################
+  ####   Private functions   ####
+  ###############################
+
+  def table do
+    Application.fetch_env!(:kv_server, :routing_table)
   end
 
   defp first_letter(word), do: word |> String.to_charlist |> List.first

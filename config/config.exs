@@ -11,6 +11,9 @@ import_config "../apps/*/config/config.exs"
 
 config :iex, default_prompt: ">c>u>s>t>o>m>"
 
+config :kv_server, :routing_table,
+  [{?a..?m, :"foo@shockn745-linux-desktop"},
+   {?n..?z, :"bar@shockn745-linux-desktop"}]
 
 
 # Sample configuration (overrides the imported configuration above):
