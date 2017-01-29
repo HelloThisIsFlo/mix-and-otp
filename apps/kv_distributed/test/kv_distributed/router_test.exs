@@ -1,6 +1,13 @@
 defmodule KVDistributed.RouterTest do
   use ExUnit.Case, async: true
 
+  defp computer_name, do: "shockn745-linux-desktop"
+  setup do
+    {:ok, computer_name} = :inet.gethostname()
+    Application.put_env(:kv_distributed, :routing_table, [{?a..?m, :"foo@shockn745-linux-desktop"},
+                                                          {?n..?z, :"bar@shockn745-linux-desktop"}])
+  end
+
   @tag :distributed
   ~S"""
   To run the distributed tags:
@@ -19,8 +26,6 @@ defmodule KVDistributed.RouterTest do
     assert KVDistributed.Router.route_and_apply("aaaa", Kernel, :node, []) == String.to_atom("foo@" <> computer_name())
     assert KVDistributed.Router.route_and_apply("zzzz", Kernel, :node, []) == String.to_atom("bar@" <> computer_name())
   end
-
-  defp computer_name, do: "shockn745-linux-desktop"
 
   test "raises on unknown entries" do
     assert_raise RuntimeError, ~r/Could not find entry/, fn ->

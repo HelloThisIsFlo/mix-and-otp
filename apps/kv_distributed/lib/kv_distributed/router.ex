@@ -27,7 +27,7 @@ defmodule KVDistributed.Router do
   ###############################
 
   def table do
-    Application.fetch_env!(:kv_server, :routing_table)
+    Application.fetch_env!(:kv_distributed, :routing_table)
   end
 
   defp first_letter(word), do: word |> String.to_charlist |> List.first
