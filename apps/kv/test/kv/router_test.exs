@@ -1,6 +1,7 @@
 defmodule KV.RouterTest do
   use ExUnit.Case, async: true
 
+  @tag :distributed
   test "route requests accross nodes" do
     assert KV.Router.route_and_apply("aaaa", Kernel, :node, []) == :"foo@shockn745-linux-desktop"
     assert KV.Router.route_and_apply("zzzz", Kernel, :node, []) == :"bar@shockn745-linux-desktop"
