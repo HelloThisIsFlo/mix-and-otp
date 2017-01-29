@@ -9,20 +9,3 @@ use Mix.Config
 # back to each application for organization purposes.
 import_config "../apps/*/config/config.exs"
 config :iex, default_prompt: ">c>u>s>t>o>m>"
-
-
-
-
-
-# On the desktop
-config :kv_distributed, :routing_table,
-  [{?a..?m, :"foo@shockn745-mac-laptop"},
-   {?n..?z, :"bar@shockn745-linux-desktop"}]
-
-
-# On the mac: Uncomment if on mac
-# config :kv_distributed, :routing_table,
-#   [{?a..?z, :"foo@shockn745-mac-laptop"}]
-
-
-
