@@ -8,17 +8,21 @@ use Mix.Config
 # configure all applications here, we prefer to delegate
 # back to each application for organization purposes.
 import_config "../apps/*/config/config.exs"
-
 config :iex, default_prompt: ">c>u>s>t>o>m>"
 
-config :kv_server, :routing_table,
-  [{?a..?m, :"foo@shockn745-linux-desktop"},
+
+
+
+
+# On the desktop
+config :kv_distributed, :routing_table,
+  [{?a..?m, :"foo@shockn745-mac-laptop"},
    {?n..?z, :"bar@shockn745-linux-desktop"}]
 
 
-# Sample configuration (overrides the imported configuration above):
-#
-#     config :logger, :console,
-#       level: :info,
-#       format: "$date $time [$level] $metadata$message\n",
-#       metadata: [:user_id]
+# On the mac: Uncomment if on mac
+# config :kv_distributed, :routing_table,
+#   [{?a..?z, :"foo@shockn745-mac-laptop"}]
+
+
+
