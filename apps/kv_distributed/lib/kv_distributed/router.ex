@@ -1,4 +1,4 @@
-defmodule KVServer.Router do
+defmodule KVDistributed.Router do
 
   def table do
     Application.fetch_env!(:kv_server, :routing_table)
@@ -18,8 +18,8 @@ defmodule KVServer.Router do
         if node == node() do
           apply(module, function, args)
         else
-          {KVServer.RouterTasks, node}
-          |> Task.Supervisor.async(KVServer.Router, :route_and_apply, [bucket_name, module, function, args])
+          {KVDistributed.RouterTasks, node}
+          |> Task.Supervisor.async(KVDistributed.Router, :route_and_apply, [bucket_name, module, function, args])
           |> Task.await
         end
     end

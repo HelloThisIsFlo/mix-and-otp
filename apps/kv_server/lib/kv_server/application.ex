@@ -12,8 +12,7 @@ defmodule KVServer.Application do
       # Starts a worker by calling: KVServer.Worker.start_link(arg1, arg2, arg3)
       # worker(KVServer.Worker, [arg1, arg2, arg3]),
       supervisor(Task.Supervisor, [[name: KVServer.TaskSupervisor]]),
-      worker(Task, [KVServer, :accept, [port()]]),
-      supervisor(Task.Supervisor, [[name: KVServer.RouterTasks]], id: KVServer.RouterTasks)
+      worker(Task, [KVServer, :accept, [port()]])
     ]
 
     opts = [strategy: :one_for_one, name: KVServer.Supervisor]
