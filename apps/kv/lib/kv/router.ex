@@ -1,8 +1,7 @@
 defmodule KV.Router do
 
   def table do
-    [{?a..?m, :"foo@shockn745-linux-desktop"},
-      {?n..?z, :"bar@shockn745-linux-desktop"}]
+    Application.fetch_env!(:kv, :routing_table)
   end
 
   @doc """
