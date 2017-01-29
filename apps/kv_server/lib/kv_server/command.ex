@@ -1,6 +1,7 @@
 defmodule KVServer.Command do
 
   @ok {:ok, "OK\r\n"}
+  @error {:error, :unknown_error}
 
   @doc ~S"""
   Parses the given `line` into a command.
@@ -47,36 +48,31 @@ defmodule KVServer.Command do
   Runs the given command
   """
   def run(command)
-
   def run({:create, bucket}) do
-    KV.Registry.create(KV.Registry, bucket)
-    @ok
+    case KV.Service.create(bucket) do
+      _ -> @ok
+    end
   end
   def run({:put, bucket, key, value}) do
-    lookup bucket, fn(pid) ->
-      KV.Bucket.put(pid, key, value)
-      @ok
+    case KV.Service.put(bucket, key, value) do
+      _ -> @ok
     end
   end
   def run({:get, bucket, key}) do
-    lookup bucket, fn(pid) ->
-      value = KV.Bucket.get(pid, key)
-      {:ok, "#{value}\r\nOK\r\n"}
+    case KV.Service.get(bucket, key) do
+      {:ok, value} ->
+        {:ok, "#{value}\r\nOK\r\n"}
+      {:error, :key_not_found} ->
+        {:ok, "\r\nOK\r\n"}
+      {:error, :bucket_not_found} ->
+        {:error, :bucket_not_found}
+      _ ->
+        @error
     end
   end
   def run({:delete, bucket, key}) do
-    lookup bucket, fn pid ->
-      KV.Bucket.delete(pid, key)
-      @ok
-    end
-  end
-
-  defp lookup(bucket_name, callback) do
-    case KV.Registry.lookup(KV.Registry, bucket_name) do
-      {:ok, pid} ->
-        callback.(pid)
-      :error ->
-        {:error, :not_found}
+    case KV.Service.delete(bucket, key) do
+      _ -> @ok
     end
   end
 
