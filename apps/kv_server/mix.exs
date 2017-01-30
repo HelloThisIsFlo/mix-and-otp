@@ -23,7 +23,8 @@ defmodule KVServer.Mixfile do
 
   defp deps do
     [
-      {:kv, in_umbrella: true}
+      {:kv, in_umbrella: true},
+      {:kv_distributed, in_umbrella: true}
     ]
   end
 end

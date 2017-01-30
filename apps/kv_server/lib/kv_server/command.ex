@@ -1,4 +1,5 @@
 defmodule KVServer.Command do
+  @service Application.fetch_env!(:kv_server, :service)
 
   @ok {:ok, "OK\r\n"}
   @error {:error, :unknown_error}
@@ -49,17 +50,17 @@ defmodule KVServer.Command do
   """
   def run(command)
   def run({:create, bucket}) do
-    case KV.Service.create(bucket) do
+    case @service.create(bucket) do
       _ -> @ok
     end
   end
   def run({:put, bucket, key, value}) do
-    case KV.Service.put(bucket, key, value) do
+    case @service.put(bucket, key, value) do
       _ -> @ok
     end
   end
   def run({:get, bucket, key}) do
-    case KV.Service.get(bucket, key) do
+    case @service.get(bucket, key) do
       {:ok, value} ->
         {:ok, "#{value}\r\nOK\r\n"}
       {:error, :key_not_found} ->
@@ -71,7 +72,7 @@ defmodule KVServer.Command do
     end
   end
   def run({:delete, bucket, key}) do
-    case KV.Service.delete(bucket, key) do
+    case @service.delete(bucket, key) do
       _ -> @ok
     end
   end

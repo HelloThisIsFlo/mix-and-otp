@@ -9,3 +9,5 @@ use Mix.Config
 # back to each application for organization purposes.
 import_config "../apps/*/config/config.exs"
 config :iex, default_prompt: ">c>u>s>t>o>m>"
+
+config :ex_unit, capture_log: true

@@ -3,7 +3,7 @@ defmodule KVDistributed.RouterTest do
 
   defp computer_name, do: "shockn745-linux-desktop"
   setup do
-    {:ok, computer_name} = :inet.gethostname()
+    # {:ok, computer_name} = :inet.gethostname()
     Application.put_env(:kv_distributed, :routing_table, [{?a..?m, :"foo@shockn745-linux-desktop"},
                                                           {?n..?z, :"bar@shockn745-linux-desktop"}])
   end
